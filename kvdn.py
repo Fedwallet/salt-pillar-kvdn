@@ -77,16 +77,16 @@ will be returned.
 
 # Import stock modules
 from __future__ import absolute_import
-import base64
+
 import logging
 import os
-import yaml
-import json
-# Import salt modules
+
 import salt.loader
 import salt.minion
 import salt.template
 import salt.utils.minions
+import yaml
+import json
 import kvdn_client
 
 # Set up logging
@@ -155,24 +155,48 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
     for filter, mappings in config_map.items():
         if minion_id in ckminions.check_minions(filter, "compound"):
             for variable, location in mappings.items():
+                if isinstance(location, basestring):
+                    # Determine if a specific key was requested
+                    try:
+                        (path, key) = location.split('?' , 1)
+                    except ValueError:
+                        (path, key) = (location, None)
 
-                # Determine if a specific key was requested
-                try:
-                    (path, key) = location.split('?' , 1)
-                except ValueError:
-                    (path, key) = (location, None)
-
-                # Return only the key value, if requested, otherwise return
-                # the entire kvdn_value json structure
-                kvdn_value = kvdnc.get(path,key)
-		try:
-                  kvdn_value=json.loads(kvdn_value)
-                except:
-		  log.debug("kvdn value not json " + kvdn_value)
+                    # Return only the key value, if requested, otherwise return
+                    # the entire kvdn_value json structure
+                    kvdn_value = kvdnc.get(path,key)
+                    try:
+                      kvdn_value=json.loads(kvdn_value)
+                    except:
+                      log.debug("kvdn value not json " + kvdn_value)
 
 
-                if kvdn_value or not CONF["unset_if_missing"]:
-                    kvdn_pillar[variable] = kvdn_value
+                    if kvdn_value or not CONF["unset_if_missing"]:
+                        kvdn_pillar[variable] = kvdn_value
+                elif isinstance(location, dict):
+		    location=dict(location)
+                    return_data=dict()
+                    for return_key, real_location in location.items():
+                        # Determine if a specific key was requested
+                        try:
+                            (path, return_key) = real_location.split('?' , 1)
+                        except ValueError:
+                            (path, return_key) = (real_location, None)
+
+                        # Return only the return_key value, if requested, otherwise return
+                        # the entire kvdn_value json structure
+                        kvdn_value = kvdnc.get(path,return_key)
+                        try:
+                            kvdn_value=json.loads(kvdn_value)
+                        except:
+                            log.debug("kvdn value not json " + kvdn_value)
+
+			return_data[return_key]=kvdn_value
+                        if kvdn_value or not CONF["unset_if_missing"]:
+                            kvdn_pillar[variable] = return_data
+                else:
+                    log.debug("kvdn config type: " + type(location).__name__)
+
 
     return kvdn_pillar
 
