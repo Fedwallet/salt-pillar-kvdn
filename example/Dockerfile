@@ -1,5 +1,5 @@
 FROM shadowsystem/saltmaster
-ADD example/master /etc/salt/master.d/example.conf
+ADD example/master /etc/salt/master
 ADD example/project.json /
 ADD example/kvdn.yml /srv/salt/kvdn.yml
 ADD example/client_override.sh /opt/
