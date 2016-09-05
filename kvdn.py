@@ -50,6 +50,7 @@ def couple(variable, location, kvdnc):
             (path, key) = location.split('?', 1)
         except ValueError:
             (path, key) = (location, json.loads(kvdnc.getKeys(location)))
+            log.debug("loaded keys for mapmap ")
 
         if isinstance(key, basestring):  # real value gets set here
             kvdn_value = kvdnc.get(path, key)
@@ -59,13 +60,14 @@ def couple(variable, location, kvdnc):
                 log.debug("kvdn value not json " + kvdn_value)
             return kvdn_value
 
-        elif isinstance(key, dict):
-            for ikey in key:
-                coupled_data[variable][ikey] = couple(ikey, location + '?' + ikey, kvdnc)
+        elif isinstance(key, list):
+            coupled_data[variable] = {}
+            for i,ikey in enumerate(key):
+                coupled_data[ikey] = couple(ikey, location + '?' + ikey, kvdnc)
 
     elif isinstance(location, dict):
         for return_key, real_location in location.items():
-            couple(return_key, real_location, kvdnc)
+            coupled_data[return_key]=couple(return_key, real_location, kvdnc)
     else:
         log.debug("strange kvdn config type: " + type(location).__name__)
 
