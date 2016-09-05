@@ -1,77 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Use KVDN secrets as a Pillar source
+Use KVDN as a Pillar source
 
-
-based on https://github.com/ripple/salt-pillar-vault/blob/master/pillar/vault.py
-
-
-Example Configuration
----------------------
-
-The KVDN server should be defined in the master config file with the
-following options:
-
-.. code-block:: yaml
-
-    ext_pillar:
-      - KVDN:
-          url: https://KVDN:8200
-          config: Local path or salt:// URL to secret configuration file
-          token: Explicit token for token authentication
-
-          unset_if_missing: Leave pillar key unset if KVDN secret not found
-
-The ``url`` parameter is the full URL to the KVDN API endpoint.
-
-The ``config`` parameter is the path or salt:// URL to the secret map YML file.
-
-The ``token`` parameter is an explicit token to use for authentication, and it
-overrides all other authentication methods.
-
-
-
-The ``unset_if_missing`` parameter determins behavior when the KVDN secret is
-missing or otherwise inaccessible. If set to ``True``, the pillar key is left
-unset. If set to ``False``, the pillar key is set to ``None``. Default is
-``False``
-
-Mapping KVDN Secrets to Minions
---------------------------------
-
-The ``config`` parameter, above, is a path to the YML file which will be
-used for mapping secrets to minions. The map uses syntax similar to the
-top file:
-
-.. code-block:: yaml
-
-    'filter':
-      'variable': 'path'
-      'variable': 'path?key'
-    'filter':
-      'variable': 'path?key'
-
-
-Each ``filter`` is a compound matcher:
-    https://docs.saltstack.com/en/latest/topics/targeting/compound.html
-
-``variable`` is the name of the variable which will be injected into the
-pillar data.
-
-``path`` is the path the desired secret on the KVDN server.
-
-``key`` is optional. If specified, only this specific key will be returned
-for the secret at ``path``. If unspecified, the entire secret json structure
-will be returned.
-
-
-.. code-block:: yaml
-
-    'web*':
-      'ssl_cert': '/secret/certs/domain?certificate'
-      'ssl_key': '/secret/certs/domain?private_key'
-    'db* and G@os.Ubuntu':
-      'db_pass': '/secret/passwords/database
+inspired by https://github.com/ripple/salt-pillar-vault/blob/master/pillar/vault.py
 
 """
 
@@ -115,7 +46,6 @@ def __virtual__():
     log.debug("initalized KVDN pillar")
     return __virtualname__
 
-
 def couple(variable, location, rtn=True):
     coupled_data = {}
     if isinstance(location, basestring):
@@ -124,25 +54,23 @@ def couple(variable, location, rtn=True):
         except ValueError:
             (path, key) = (location, json.loads(kvdnc.getKeys(location)))
 
-        if isinstance(key, basestring):
+        if isinstance(key, basestring):  # real value gets set here
             kvdn_value = kvdnc.get(path, key)
             try:
                 kvdn_value = json.loads(kvdn_value)
             except:
                 log.debug("kvdn value not json " + kvdn_value)
-
+            coupled_data[variable]=kvdn_value
 
         elif isinstance(key, dict):
             for ikey in key:
                 coupled_data[variable][ikey] = couple(ikey, location + '?' + ikey)
 
     elif isinstance(location, dict):
-        location = dict(location)
-        return_data = dict()
         for return_key, real_location in location.items():
             couple(return_key, real_location)
     else:
-        log.debug("kvdn config type: " + type(location).__name__)
+        log.debug("strange kvdn config type: " + type(location).__name__)
 
     if coupled_data or not CONF["unset_if_missing"]:
         return coupled_data
