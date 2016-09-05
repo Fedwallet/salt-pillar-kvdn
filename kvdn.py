@@ -105,13 +105,47 @@ if os.environ.get('KVDN_TOKEN'):
 if CONF["token_path"]:
     CONF["token"] = open(CONF["token_path"]).read()
 
+# KVDN
+kvdnc = kvdn_client.kvdn_client(baseurl=CONF["url"], token=CONF["token"])
+
 __virtualname__ = 'kvdn'
+
+
 def __virtual__():
     log.debug("initalized KVDN pillar")
     return __virtualname__
 
 
+def couple(variable, location, rtn=True):
+    coupled_data = {}
+    if isinstance(location, basestring):
+        try:
+            (path, key) = location.split('?', 1)
+        except ValueError:
+            (path, key) = (location, json.loads(kvdnc.getKeys(location)))
 
+        if isinstance(key, basestring):
+            kvdn_value = kvdnc.get(path, key)
+            try:
+                kvdn_value = json.loads(kvdn_value)
+            except:
+                log.debug("kvdn value not json " + kvdn_value)
+
+
+        elif isinstance(key, dict):
+            for ikey in key:
+                coupled_data[variable][ikey] = couple(ikey, location + '?' + ikey)
+
+    elif isinstance(location, dict):
+        location = dict(location)
+        return_data = dict()
+        for return_key, real_location in location.items():
+            couple(return_key, real_location)
+    else:
+        log.debug("kvdn config type: " + type(location).__name__)
+
+    if coupled_data or not CONF["unset_if_missing"]:
+        return coupled_data
 
 
 def ext_pillar(minion_id, pillar, *args, **kwargs):
@@ -123,8 +157,8 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
     # Load configuration values
     for key in CONF:
         if kwargs.get(key, None):
-            CONF[key] = kwargs.get(key,None)
-            log.debug("set config key " + key + " to value " + kwargs.get(key,None))
+            CONF[key] = kwargs.get(key, None)
+            log.debug("set config key " + key + " to value " + kwargs.get(key, None))
 
     # Resolve salt:// fileserver path, if necessary
     if CONF["config"].startswith("salt://"):
@@ -146,57 +180,12 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
         log.error("'url' must be specified for KVDN configuration")
         return kvdn_pillar
 
-    #  KVDN
-    kvdnc = kvdn_client.kvdn_client(baseurl=CONF["url"],token=CONF["token"])
-
     # Apply the compound filters to determine which mappings to expose for this minion
     ckminions = salt.utils.minions.CkMinions(__opts__)
 
     for filter, mappings in config_map.items():
         if minion_id in ckminions.check_minions(filter, "compound"):
             for variable, location in mappings.items():
-                if isinstance(location, basestring):
-                    # Determine if a specific key was requested
-                    try:
-                        (path, key) = location.split('?' , 1)
-                    except ValueError:
-                        (path, key) = (location, None)
-
-                    # Return only the key value, if requested, otherwise return
-                    # the entire kvdn_value json structure
-                    kvdn_value = kvdnc.get(path,key)
-                    try:
-                      kvdn_value=json.loads(kvdn_value)
-                    except:
-                      log.debug("kvdn value not json " + kvdn_value)
-
-
-                    if kvdn_value or not CONF["unset_if_missing"]:
-                        kvdn_pillar[variable] = kvdn_value
-                elif isinstance(location, dict):
-		    location=dict(location)
-                    return_data=dict()
-                    for return_key, real_location in location.items():
-                        # Determine if a specific key was requested
-                        try:
-                            (path, return_key) = real_location.split('?' , 1)
-                        except ValueError:
-                            (path, return_key) = (real_location, None)
-
-                        # Return only the return_key value, if requested, otherwise return
-                        # the entire kvdn_value json structure
-                        kvdn_value = kvdnc.get(path,return_key)
-                        try:
-                            kvdn_value=json.loads(kvdn_value)
-                        except:
-                            log.debug("kvdn value not json " + kvdn_value)
-
-			return_data[return_key]=kvdn_value
-                        if kvdn_value or not CONF["unset_if_missing"]:
-                            kvdn_pillar[variable] = return_data
-                else:
-                    log.debug("kvdn config type: " + type(location).__name__)
-
+                kvdn_pillar[variable] = couple(variable, location)
 
     return kvdn_pillar
-
