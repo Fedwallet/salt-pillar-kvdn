@@ -61,7 +61,6 @@ def couple(variable, location, kvdnc):
             return kvdn_value
 
         elif isinstance(key, list):
-            coupled_data[variable] = {}
             for i,ikey in enumerate(key):
                 coupled_data[ikey] = couple(ikey, location + '?' + ikey, kvdnc)
 
