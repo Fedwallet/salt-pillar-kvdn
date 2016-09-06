@@ -1,27 +1,76 @@
-root@7484193a8698:/# KEY_SET='PWD UID' encodeJson 
-{"PWD":"/","UID":"0"}
-root@7484193a8698:/# KEY_SET='PWD UID' encodeJson | python /opt/clients-3.3.2-1.0.9/python/kvdn-cli.py --set --key test_key1 this/that                                                                       
-JWT_TOKEN not set 
+$:  KEY_SET='UID PWD RANDOM' encodeJson                                                                                                           
+{"PWD":"/","RANDOM":"16239","UID":"0"}
+$:  export KVDN_BASE_URL='http://172.17.0.1:6500'                                                                                                $
+$:  KEY_SET='UID PWD RANDOM' encodeJson | kvdn-cli --submit this/other                                                                            
+JWT_TOKEN not set
+other:f528d75e20ab60b3cb8ae9f2ff454b29
+$:  KEY_SET='UID PWD RANDOM' encodeJson | kvdn-cli --submit this/other                                                                            
+JWT_TOKEN not set
+other:8e2ddb28ce45502a3d69728e6f8a8db9
+$:  KEY_SET='UID PWD RANDOM' encodeJson | kvdn-cli --set --key test_key1 this/that                                                                
+JWT_TOKEN not set
 that:test_key1
-root@7484193a8698:/# salt '*' pillar.items                                                                                                                                                                   
-
+$:  KEY_SET='UID PWD RANDOM' encodeJson | kvdn-cli --set --key test_key2 this/that                                                                
+JWT_TOKEN not set
+that:test_key2
+$:  salt '*' test.ping                                                                                                                            
+saltmaster:
+    True
+$:  salt '*' pillar.items                                                                                                                        $
 saltmaster:
     ----------
     complex_pillar_value:
         ----------
-        test_key1:
+        key_1:
             ----------
             PWD:
                 /
+            RANDOM:
+                25148
             UID:
                 0
-        test_key2:
-            h2ello
+        key_2:
+            ----------
+            PWD:
+                /
+            RANDOM:
+                21061
+            UID:
+                0
+        key_4:
+            ----------
+            546c197ef3aeb3a1bfe4c3e1b1835477:
+                ----------
+                PWD:
+                    /
+                RANDOM:
+                    27214
+                UID:
+                    0
+            75cd27626ef9610dc1de53e923e9f50a:
+                ----------
+                PWD:
+                    /
+                RANDOM:
+                    25795
+                UID:
+                    0
     test_value1:
         ----------
         PWD:
             /
+        RANDOM:
+            25148
         UID:
             0
     test_value2:
-        h2ello
+        ----------
+        PWD:
+            /
+        RANDOM:
+            21061
+        UID:
+            0
+
+
+
