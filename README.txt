@@ -18,7 +18,8 @@ that:test_key2
 $ salt '*' test.ping                                                                                                                              
 saltmaster:
     True
-$ salt '*' pillar.items                                                                                                                          $
+$ salt '*' pillar.items                                                                                                         
+
 saltmaster:
     ----------
     complex_pillar_value:
