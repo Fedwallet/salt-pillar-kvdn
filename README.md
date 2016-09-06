@@ -16,6 +16,7 @@ complex_pillar_value has several subkeys mapped, and key_4 is a special key
 
 key_4 refrences the map 'this/other'. the keys for that map are looked up, and the map is unrolled onto key4
 
+if the kvdn value is valid json, it will be decoded and overlaid on the pillar, retaining its structure
 ```
 $ KEY_SET='UID PWD RANDOM' encodeJson
 {"PWD":"/","RANDOM":"16239","UID":"0"}
