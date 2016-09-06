@@ -1,3 +1,22 @@
+The following configuration
+
+```
+
+'*':
+  test_value1: this/that?test_key1
+  test_value2: this/that?test_key2
+  complex_pillar_value:
+    key_1: this/that?test_key1
+    key_2: this/that?test_key2
+    key_4: this/other
+```
+the above
+maps the pillar key test_value1 to kvdn storage address 'this/that' and the key test_key1
+complex_pillar_value has several subkeys mapped, and key_4 is a special key
+
+key_4 refrences the map 'this/other'. the keys for that map are looked up, and the map is unrolled onto key4
+
+```
 $ KEY_SET='UID PWD RANDOM' encodeJson
 {"PWD":"/","RANDOM":"16239","UID":"0"}
 
@@ -74,3 +93,4 @@ saltmaster:
         UID:
             0
 
+```
