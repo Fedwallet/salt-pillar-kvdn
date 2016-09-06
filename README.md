@@ -10,7 +10,7 @@ The following configuration
     key_2: this/that?test_key2
     key_4: this/other
 ```
-the above
+
 maps the pillar key test_value1 to kvdn storage address 'this/that' and the key test_key1
 complex_pillar_value has several subkeys mapped, and key_4 is a special key
 
