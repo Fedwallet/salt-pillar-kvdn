@@ -30,10 +30,6 @@ CONF = {
     'token_path': None,
     'unset_if_missing': False
 }
-if os.environ.get('KVDN_TOKEN'):
-    CONF["token"] = os.environ.get('KVDN_TOKEN')
-if CONF["token_path"]:
-    CONF["token"] = open(CONF["token_path"]).read()
 
 
 __virtualname__ = 'kvdn'
@@ -85,8 +81,16 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
         if kwargs.get(key, None):
             CONF[key] = kwargs.get(key, None)
             log.debug("set config key " + key + " to value " + kwargs.get(key, None))
+    if os.environ.get('KVDN_TOKEN'):
+      CONF["token"] = os.environ.get('KVDN_TOKEN')
+    if CONF["token_path"]:
+      CONF["token"] = open(CONF["token_path"]).read()
+
     # KVDN
-    kvdnc = kvdn_client.kvdn_client(baseurl=CONF["url"], token=CONF["token"])
+    try:
+      kvdnc = kvdn_client.kvdn_client(baseurl=CONF["url"], token=CONF["token"])
+    except ClientError:
+      log.debug("Error getting kvdn connection " + ClientError)
 
     # Resolve salt:// fileserver path, if necessary
     if CONF["config"].startswith("salt://"):
