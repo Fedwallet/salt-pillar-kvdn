@@ -28,16 +28,25 @@ CONF = {
     'config': '/srv/salt/kvdn.yml',
     'token': None,
     'token_path': None,
-    'unset_if_missing': False
+    'unset_if_missing': False,
+    'dynamic_config_map': 'salt/pillar_mapping',
+    'dynamic_config_key': 'dynamic_config',
+    'dynamic_config_enabled': False
 }
 
-
 __virtualname__ = 'kvdn'
+
+
+def merge(x, y):
+    z = x.copy()
+    z.update(y)
+    return z
 
 
 def __virtual__():
     log.debug("initalized KVDN pillar")
     return __virtualname__
+
 
 def couple(variable, location, kvdnc):
     coupled_data = {}
@@ -62,7 +71,7 @@ def couple(variable, location, kvdnc):
 
     elif isinstance(location, dict):
         for return_key, real_location in location.items():
-            coupled_data[return_key]=couple(return_key, real_location, kvdnc)
+            coupled_data[return_key] = couple(return_key, real_location, kvdnc)
     else:
         log.debug("strange kvdn config type: " + type(location).__name__)
 
@@ -107,6 +116,12 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
     else:
         log.error("Unable to read configuration file '%s'", CONF["config"])
         return kvdn_pillar
+    if CONF["dynamic_config_enabled"]:
+        try:
+            dynamic_config = json.loads(kvdnc.get(CONF["dynamic_config_map"], CONF["dynamic_config_key"]))
+            config_map = merge(config_map, dynamic_config)
+        except:
+            log.error("unable to load dynamic config")
 
     if not CONF["url"]:
         log.error("'url' must be specified for KVDN configuration")
