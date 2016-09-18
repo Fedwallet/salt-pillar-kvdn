@@ -66,7 +66,7 @@ def couple(variable, location, kvdnc):
             return kvdn_value
 
         elif isinstance(key, list):
-            for i,ikey in enumerate(key):
+            for i, ikey in enumerate(key):
                 coupled_data[ikey] = couple(ikey, location + '?' + ikey, kvdnc)
 
     elif isinstance(location, dict):
@@ -92,15 +92,15 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
             log.debug("set config key " + key + " to value " + kwargs.get(key, None))
 
     if CONF["token_path"]:
-      CONF["token"] = open(CONF["token_path"]).read()
+        CONF["token"] = open(CONF["token_path"]).read()
     if os.environ.get('KVDN_TOKEN'):
-      CONF["token"] = os.environ.get('KVDN_TOKEN')
+        CONF["token"] = os.environ.get('KVDN_TOKEN')
 
     # KVDN
     try:
-      kvdnc = kvdn_client.kvdn_client(baseurl=CONF["url"], token=CONF["token"])
+        kvdnc = kvdn_client.kvdn_client(baseurl=CONF["url"], token=CONF["token"])
     except ClientError:
-      log.debug("Error getting kvdn connection " + ClientError)
+        log.debug("Error getting kvdn connection " + ClientError)
 
     # Resolve salt:// fileserver path, if necessary
     if CONF["config"].startswith("salt://"):
