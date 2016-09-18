@@ -48,7 +48,7 @@ def __virtual__():
     return __virtualname__
 
 
-def couple(variable, location, kvdnc):
+def couple(location, kvdnc):
     coupled_data = {}
     if isinstance(location, basestring):
         try:
@@ -134,6 +134,6 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
     for filter, mappings in config_map.items():
         if minion_id in ckminions.check_minions(filter, "compound"):
             for variable, location in mappings.items():
-                kvdn_pillar[variable] = couple(variable, location, kvdnc)
+                kvdn_pillar[variable] = couple(location, kvdnc)
 
     return kvdn_pillar
