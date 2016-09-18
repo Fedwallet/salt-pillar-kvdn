@@ -5,3 +5,4 @@
   complex_pillar_value:
     key_1: this/that?test_key1
     key_2: this/that?test_key2
+    key_4: this/other
