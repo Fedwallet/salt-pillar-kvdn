@@ -63,7 +63,8 @@ def couple(location, kvdnc):
                 kvdn_value = json.loads(kvdn_value)
             except:
                 log.debug("kvdn value not json " + kvdn_value)
-            return kvdn_value
+            if kvdn_value or not CONF["unset_if_missing"]:
+                return kvdn_value
 
         elif isinstance(key, list):
             for i, ikey in enumerate(key):
@@ -121,6 +122,7 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
         try:
             dynamic_config = json.loads(kvdnc.get(CONF["dynamic_config_map"], CONF["dynamic_config_key"]))
             config_map = merge(config_map, dynamic_config)
+            log.info("loaded dynamic configration")
         except:
             log.error("unable to load dynamic config")
 
