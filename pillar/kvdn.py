@@ -19,7 +19,7 @@ import salt.utils.minions
 import yaml
 import json
 from kvdn_client import kvdn_client
-kvdn_py_ver = "1.4"
+kvdn_py_ver = "1.5.1-0"
 # Set up logging
 log = logging.getLogger(__name__)
 # Default config values
