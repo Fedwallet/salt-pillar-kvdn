@@ -100,8 +100,9 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
     # KVDN
     try:
         kvdnc = kvdn_client.kvdn_client(baseurl=CONF["url"], token=CONF["token"])
-    except ClientError:
+    except:
         log.debug("Error getting kvdn connection " + ClientError)
+        return kvdn_pillar
 
     # Resolve salt:// fileserver path, if necessary
     if CONF["config"].startswith("salt://"):
@@ -112,7 +113,12 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
 
     # Read the kvdn_value map
     renderers = salt.loader.render(__opts__, __salt__)
-    raw_yml = salt.template.compile_template(CONF["config"], renderers, 'jinja')
+
+    try:
+        raw_yml = salt.template.compile_template(CONF["config"], renderers, 'jinja')
+    except:
+        log.error("error while rendering the config kvdn config template")
+        return kvdn_pillar
     if raw_yml:
         config_map = yaml.safe_load(raw_yml.getvalue()) or {}
     else:
