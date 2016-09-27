@@ -68,11 +68,11 @@ def couple(location, kvdnc):
 
         elif isinstance(key, list):
             for i, ikey in enumerate(key):
-                coupled_data[ikey] = couple(ikey, location + '?' + ikey, kvdnc)
+                coupled_data[ikey] = couple(location + '?' + ikey, kvdnc)
 
     elif isinstance(location, dict):
         for return_key, real_location in location.items():
-            coupled_data[return_key] = couple(return_key, real_location, kvdnc)
+            coupled_data[return_key] = couple(real_location, kvdnc)
     else:
         log.debug("strange kvdn config type: " + type(location).__name__)
 
