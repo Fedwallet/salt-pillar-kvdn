@@ -142,6 +142,8 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
     for filter, mappings in config_map.items():
         if minion_id in ckminions.check_minions(filter, "compound"):
             for variable, location in mappings.items():
-                kvdn_pillar[variable] = couple(location, kvdnc)
+              return_data = couple(location,conn)
+              if return_data:
+                kvdn_pillar[variable] = return_data
 
     return kvdn_pillar
