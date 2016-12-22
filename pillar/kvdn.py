@@ -115,7 +115,7 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
     renderers = salt.loader.render(__opts__, __salt__)
 
     try:
-        raw_yml = salt.template.compile_template(CONF["config"], renderers, 'jinja')
+        raw_yml = salt.template.compile_template(CONF["config"], renderers, 'jinja', whitelist=[], blacklist=[])
     except:
         log.error("error while rendering the config kvdn config template")
         return kvdn_pillar
