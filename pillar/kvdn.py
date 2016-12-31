@@ -104,7 +104,7 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
 
     # KVDN
     try:
-        kvdnc = kvdn_client.kvdn_client(CONF)
+        kvdnc = kvdn_client.kvdn_client(**CONF)
     except:
         log.debug("Error getting kvdn connection " + ClientError)
         return kvdn_pillar
