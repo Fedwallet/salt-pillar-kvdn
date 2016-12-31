@@ -37,7 +37,6 @@ CONF = {
     'cert':None,
     'prefix':'',
     'set':'raw',
-    'debug':True
 }
 
 __virtualname__ = 'kvdn'
