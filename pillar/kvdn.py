@@ -24,14 +24,19 @@ kvdn_py_ver = "1.5.1-0"
 log = logging.getLogger(__name__)
 # Default config values
 CONF = {
-    'url': 'https://KVDN:8200',
+    'baseurl': 'https://KVDN:6500',
     'config': '/srv/salt/kvdn.yml',
     'token': None,
     'token_path': None,
     'unset_if_missing': False,
     'dynamic_config_map': 'salt/pillar_mapping',
     'dynamic_config_key': 'dynamic_config',
-    'dynamic_config_enabled': False
+    'dynamic_config_enabled': False,
+    'verify':True,
+    'timeout':15,
+    'cert':None,
+    'prefix':'',
+    'set':'raw'
 }
 
 __virtualname__ = 'kvdn'
@@ -99,7 +104,7 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
 
     # KVDN
     try:
-        kvdnc = kvdn_client.kvdn_client(baseurl=CONF["url"], token=CONF["token"])
+        kvdnc = kvdn_client.kvdn_client(CONF)
     except:
         log.debug("Error getting kvdn connection " + ClientError)
         return kvdn_pillar
