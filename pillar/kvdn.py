@@ -37,15 +37,16 @@ CONF = {
     'cert':None,
     'prefix':'',
     'set':'raw',
-    'debug':True
+    'debug':False
 }
 
 __virtualname__ = 'kvdn'
 
 def _kvlog(data):
-    f = open('/tmp/kvdn_pillar_log_file','a')
-    f.write(str(data) + '\n')
-    f.close()
+    if CONF['debug']:
+        f = open('/tmp/kvdn_pillar_log_file','a')
+        f.write(str(data) + '\n')
+        f.close()
 _kvlog('hello there')
 _kvlog("loaded salt-pillar-kvdn")
 
